@@ -1,0 +1,15 @@
+@FMCK_Trainer_Api_HostAddress = http://localhost:5116
+
+GET {{FMCK_Trainer_Api_HostAddress}}/api/positions/all
+Accept: application/json
+
+###
+
+GET {{FMCK_Trainer_Api_HostAddress}}/api/positions
+Accept: application/json
+
+
+###
+
+GET {{FMCK_Trainer_Api_HostAddress}}/api/positions/f4e0d8b4-860c-4ecc-8df4-ca928924d696
+Accept: application/json
