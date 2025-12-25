@@ -1,5 +1,6 @@
 ﻿using FMCK.Trainer.Api.Data;
 using FMCK.Trainer.Api.Models;
+using FMCK.Trainer.Api.Services;
 
 namespace FMCK.Trainer.Api.Endpoints.Positions;
 
@@ -23,12 +24,29 @@ public static class PositionsEndpoints
     }
 
     // DTOs (recommended to avoid over-posting)
-    public record CreatePositionRequest(string Name, Coordinates Coordinates, string Address);
-    public record UpdatePositionRequest(string Name, Coordinates Coordinates, string Address);
+    public record CreatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
+    public record UpdatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
+
+    // private static async Task<IResult> GetAll([FromServices] AppDbContext db)
+    //     => Results.Ok(await db.Positions.AsNoTracking().ToListAsync());
 
     private static async Task<IResult> GetAll([FromServices] AppDbContext db)
-        => Results.Ok(await db.Positions.AsNoTracking().ToListAsync());
+    {
+        var positions = await db.Positions
+            .AsNoTracking()
+            .Select(p => new PositionDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Coordinates = p.Coordinates,
+                Sweref99Coordinates = CoordinateConverter.Convert(p.Coordinates),
+                Address = p.Address
+            })
+            .ToListAsync();
 
+        return Results.Ok(positions);
+    }
+    
     private static async Task<IResult> GetById([FromServices] AppDbContext db, Guid id)
     {
         var pos = await db.Positions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);

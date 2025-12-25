@@ -1,5 +1,4 @@
 ﻿using FMCK.Trainer.Api.Data;
-using FMCK.Trainer.Api.Endpoints.Positions;
 using Microsoft.EntityFrameworkCore;
 
 namespace FMCK.Trainer.Api.Startup;
