@@ -1,11 +1,5 @@
 using FMCK.Trainer.Api.Startup;
 
-// await WebApplication
-//     .CreateBuilder(args)
-//     .ConfigureServices()
-//     .ConfigurePipeline()
-//     .RunAsync();
-
 var builder = WebApplication.CreateBuilder(args);
 builder.ConfigureServices();
 
