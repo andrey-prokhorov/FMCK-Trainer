@@ -1,0 +1,169 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-tests:
+    name: Backend (.NET) unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api/src
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore -c Release
+
+      - name: Test
+        run: dotnet test --no-build -c Release
+
+  # frontend-tests:
+    # name: Frontend (Jest) unit tests
+    # runs-on: ubuntu-latest
+    # defaults:
+      # run:
+        # working-directory: app
+    # steps:
+      # - uses: actions/checkout@v4
+
+      # - name: Setup Node
+        # uses: actions/setup-node@v4
+        # with:
+          # node-version: "25"
+          # cache: "npm"
+          # cache-dependency-path: app/package-lock.json
+
+      # - name: Install
+        # run: npm ci
+
+      # - name: Unit tests (Jest)
+        # run: npm test -- --ci
+
+  # cypress-e2e:
+    # name: Cypress E2E
+    # runs-on: ubuntu-latest
+    # needs: [backend-tests, frontend-tests]
+    # steps:
+      # - uses: actions/checkout@v4
+
+      # # --- Start API on 5116 ---
+      # - name: Setup .NET
+        # uses: actions/setup-dotnet@v4
+        # with:
+          # dotnet-version: "8.0.x"
+
+      # - name: Build API
+        # working-directory: api
+        # run: |
+          # dotnet restore
+          # dotnet build -c Release
+
+      # - name: Start API (background)
+        # working-directory: api
+        # run: |
+          # nohup dotnet run -c Release --urls http://localhost:5116 > api.log 2>&1 &
+
+      # # --- Frontend deps + start ---
+      # - name: Setup Node
+        # uses: actions/setup-node@v4
+        # with:
+          # node-version: "25"
+          # cache: "npm"
+          # cache-dependency-path: app/package-lock.json
+
+      # - name: Install frontend deps
+        # working-directory: app
+        # run: npm ci
+
+      # - name: Start frontend (background)
+        # working-directory: app
+        # run: |
+          # nohup npm run start -- --port 3000 > app.log 2>&1 &
+
+      # # --- Cypress ---
+      # - name: Cypress run
+        # uses: cypress-io/github-action@v6
+        # with:
+          # working-directory: app
+          # wait-on: "http://localhost:3000, http://localhost:5116/health"
+          # wait-on-timeout: 120000
+          # command: npm run cypress:run
+        # env:
+          # CYPRESS_baseUrl: http://localhost:3000
+
+      # - name: Upload logs & artifacts
+        # if: always()
+        # uses: actions/upload-artifact@v4
+        # with:
+          # name: e2e-artifacts
+          # path: |
+            # api/api.log
+            # app/app.log
+            # app/cypress/videos
+            # app/cypress/screenshots
+
+  # newman-api-tests:
+    # name: Postman (Newman) API tests
+    # runs-on: ubuntu-latest
+    # needs: [backend-tests]
+    # steps:
+      # - uses: actions/checkout@v4
+
+      # - name: Setup Node
+        # uses: actions/setup-node@v4
+        # with:
+          # node-version: "25"
+
+      # - name: Install Newman + wait-on
+        # run: npm i -g newman wait-on
+
+      # # --- Start API on 5116 ---
+      # - name: Setup .NET
+        # uses: actions/setup-dotnet@v4
+        # with:
+          # dotnet-version: "8.0.x"
+
+      # - name: Build API
+        # working-directory: api
+        # run: |
+          # dotnet restore
+          # dotnet build -c Release
+
+      # - name: Start API (background)
+        # working-directory: api
+        # run: |
+          # nohup dotnet run -c Release --urls http://localhost:5116 > api.log 2>&1 &
+
+      # - name: Wait for API
+        # run: wait-on http://localhost:5116/health -t 120000
+
+      # # --- Run Postman collection ---
+      # - name: Run Newman collection
+        # run: |
+          # newman run postman/collection.json \
+            # --env-var baseUrl=http://localhost:5116 \
+            # --reporters cli
+
+      # - name: Upload api log (optional)
+        # if: always()
+        # uses: actions/upload-artifact@v4
+        # with:
+          # name: newman-logs
+          # path: api/api.log
