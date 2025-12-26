@@ -13,22 +13,18 @@ public static class PositionsEndpoints
     {
         var group = app.MapGroup("/positions").WithTags("Positions");
 
-        group.MapPost("/", CreatePosition);
-        group.MapPut("/{id:guid}", UpdatePosition);
-        group.MapDelete("/{id:guid}", DeletePosition);
-
-        // handy reads
         group.MapGet("/all", GetAll);
         group.MapGet("/{id:guid}", GetById);
         group.MapGet("/", GetRandomPosition);
+
+        group.MapPost("/", CreatePosition);
+        group.MapPut("/{id:guid}", UpdatePosition);
+        group.MapDelete("/{id:guid}", DeletePosition);        
     }
 
-    // DTOs (recommended to avoid over-posting)
-    public record CreatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
-    public record UpdatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
+    private record CreatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
 
-    // private static async Task<IResult> GetAll([FromServices] AppDbContext db)
-    //     => Results.Ok(await db.Positions.AsNoTracking().ToListAsync());
+    private record UpdatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
 
     private static async Task<IResult> GetAll([FromServices] AppDbContext db)
     {
@@ -62,7 +58,6 @@ public static class PositionsEndpoints
         return pos is null ? Results.NotFound() : Results.Ok(pos);
     }
 
-    // ADD
     private static async Task<IResult> CreatePosition(
         [FromServices] AppDbContext db,
         [FromBody] CreatePositionRequest req)
@@ -81,7 +76,6 @@ public static class PositionsEndpoints
         return Results.Created($"/positions/{entity.Id}", entity);
     }
 
-    // UPDATE
     private static async Task<IResult> UpdatePosition(
         [FromServices] AppDbContext db,
         Guid id,
@@ -99,7 +93,6 @@ public static class PositionsEndpoints
         return Results.Ok(entity);
     }
 
-    // DELETE
     private static async Task<IResult> DeletePosition([FromServices] AppDbContext db, Guid id)
     {
         var entity = await db.Positions.FirstOrDefaultAsync(x => x.Id == id);
