@@ -16,9 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: api/src
+        working-directory: api
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Show directory tree (depth 4)
+        run: tree -L 4      
+        
+      - name: Show current working directory
+        run: pwd        
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
