@@ -20,6 +20,12 @@ public static class CoordinateConverter
 
     public static Sweref99Coordinates Convert(Wgs84Coordinates coordinates)
     {
+        return new Sweref99Coordinates
+        {
+            Northing = 0,
+            Easting = 0
+        };
+        
         var epsgWgs84 = EpsgNumber.WORLD__WGS_84__4326;
         var epsgSweRef = EpsgNumber.SWEDEN__SWEREF99_TM__3006;
 
