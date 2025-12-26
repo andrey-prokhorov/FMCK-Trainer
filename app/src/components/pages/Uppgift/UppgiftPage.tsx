@@ -36,7 +36,7 @@ export const UppgiftPage = () => {
 		setIsCorrect(false)
 
 		try {
-			const data = await fetchUppgiftPosition()
+			const data = null //await fetchUppgiftPosition()
 
 			setPosition(data)
 		} catch (e: unknown) {
