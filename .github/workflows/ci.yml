@@ -19,12 +19,12 @@ jobs:
         working-directory: api
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Show directory tree (depth 4)
-        run: tree -L 4
-
+        run: tree -L 4      
+        
       - name: Show current working directory
-        run: pwd
+        run: pwd        
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -41,7 +41,29 @@ jobs:
         run: dotnet test --no-build -c Release
 
   frontend-tests:
-    name: Frontend (Vitest) unit tests
+      name: Frontend (Vitest) unit tests
+      runs-on: ubuntu-latest
+      defaults:
+        run:
+          working-directory: app
+      steps:
+        - uses: actions/checkout@v4
+
+        - name: Setup Node
+          uses: actions/setup-node@v4
+          with:
+            node-version: "25"
+            cache: "npm"
+            cache-dependency-path: app/package-lock.json
+
+        - name: Install dependencies
+          run: npm ci
+
+        - name: Unit tests (Vitest)
+          run: npm run test:ci
+          
+  playwright-e2e:
+    name: Frontend (Playwright) E2E tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -52,130 +74,75 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "25"
+          node-version: "22"
           cache: "npm"
           cache-dependency-path: app/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
 
-      - name: Type check
+      - name: Build application
         run: npm run build
 
-      - name: Unit tests (Vitest)
-        run: npm run test:ci
+      - name: Run Playwright tests
+        run: npm run e2e:ci
 
-  # cypress-e2e:
-  # name: Cypress E2E
-  # runs-on: ubuntu-latest
-  # needs: [backend-tests, frontend-tests]
-  # steps:
-  # - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: app/playwright-report/
+          retention-days: 30
 
-  # # --- Start API on 5116 ---
-  # - name: Setup .NET
-  # uses: actions/setup-dotnet@v4
-  # with:
-  # dotnet-version: "8.0.x"
-
-  # - name: Build API
-  # working-directory: api
-  # run: |
-  # dotnet restore
-  # dotnet build -c Release
-
-  # - name: Start API (background)
-  # working-directory: api
-  # run: |
-  # nohup dotnet run -c Release --urls http://localhost:5116 > api.log 2>&1 &
-
-  # # --- Frontend deps + start ---
-  # - name: Setup Node
-  # uses: actions/setup-node@v4
-  # with:
-  # node-version: "25"
-  # cache: "npm"
-  # cache-dependency-path: app/package-lock.json
-
-  # - name: Install frontend deps
-  # working-directory: app
-  # run: npm ci
-
-  # - name: Start frontend (background)
-  # working-directory: app
-  # run: |
-  # nohup npm run start -- --port 3000 > app.log 2>&1 &
-
-  # # --- Cypress ---
-  # - name: Cypress run
-  # uses: cypress-io/github-action@v6
-  # with:
-  # working-directory: app
-  # wait-on: "http://localhost:3000, http://localhost:5116/health"
-  # wait-on-timeout: 120000
-  # command: npm run cypress:run
-  # env:
-  # CYPRESS_baseUrl: http://localhost:3000
-
-  # - name: Upload logs & artifacts
-  # if: always()
-  # uses: actions/upload-artifact@v4
-  # with:
-  # name: e2e-artifacts
-  # path: |
-  # api/api.log
-  # app/app.log
-  # app/cypress/videos
-  # app/cypress/screenshots
 
   # newman-api-tests:
-  # name: Postman (Newman) API tests
-  # runs-on: ubuntu-latest
-  # needs: [backend-tests]
-  # steps:
-  # - uses: actions/checkout@v4
+    # name: Postman (Newman) API tests
+    # runs-on: ubuntu-latest
+    # needs: [backend-tests]
+    # steps:
+      # - uses: actions/checkout@v4
 
-  # - name: Setup Node
-  # uses: actions/setup-node@v4
-  # with:
-  # node-version: "25"
+      # - name: Setup Node
+        # uses: actions/setup-node@v4
+        # with:
+          # node-version: "25"
 
-  # - name: Install Newman + wait-on
-  # run: npm i -g newman wait-on
+      # - name: Install Newman + wait-on
+        # run: npm i -g newman wait-on
 
-  # # --- Start API on 5116 ---
-  # - name: Setup .NET
-  # uses: actions/setup-dotnet@v4
-  # with:
-  # dotnet-version: "8.0.x"
+      # # --- Start API on 5116 ---
+      # - name: Setup .NET
+        # uses: actions/setup-dotnet@v4
+        # with:
+          # dotnet-version: "8.0.x"
 
-  # - name: Build API
-  # working-directory: api
-  # run: |
-  # dotnet restore
-  # dotnet build -c Release
+      # - name: Build API
+        # working-directory: api
+        # run: |
+          # dotnet restore
+          # dotnet build -c Release
 
-  # - name: Start API (background)
-  # working-directory: api
-  # run: |
-  # nohup dotnet run -c Release --urls http://localhost:5116 > api.log 2>&1 &
+      # - name: Start API (background)
+        # working-directory: api
+        # run: |
+          # nohup dotnet run -c Release --urls http://localhost:5116 > api.log 2>&1 &
 
-  # - name: Wait for API
-  # run: wait-on http://localhost:5116/health -t 120000
+      # - name: Wait for API
+        # run: wait-on http://localhost:5116/health -t 120000
 
-  # # --- Run Postman collection ---
-  # - name: Run Newman collection
-  # run: |
-  # newman run postman/collection.json \
-  # --env-var baseUrl=http://localhost:5116 \
-  # --reporters cli
+      # # --- Run Postman collection ---
+      # - name: Run Newman collection
+        # run: |
+          # newman run postman/collection.json \
+            # --env-var baseUrl=http://localhost:5116 \
+            # --reporters cli
 
-  # - name: Upload api log (optional)
-  # if: always()
-  # uses: actions/upload-artifact@v4
-  # with:
-  # name: newman-logs
-  # path: api/api.log
+      # - name: Upload api log (optional)
+        # if: always()
+        # uses: actions/upload-artifact@v4
+        # with:
+          # name: newman-logs
+          # path: api/api.log
