@@ -28,61 +28,10 @@ import {
 } from "@mui/material";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-type Coordinates = {
-	lat: number;
-	lon: number;
-};
-
-type Position = {
-	id: string;
-	name: string;
-	coordinates: Coordinates;
-	address: string;
-};
-
-type PositionsResponse = {
-	positions: Position[];
-};
-
-type PositionFormState = {
-	name: string;
-	lat: string;
-	lon: string;
-	address: string;
-};
-
-function toForm(p?: Position): PositionFormState {
-	return {
-		name: p?.name ?? "",
-		lat: p ? String(p.coordinates.lat) : "",
-		lon: p ? String(p.coordinates.lon) : "",
-		address: p?.address ?? "",
-	};
-}
-
-function parseNumber(value: string): number | null {
-	if (!value.trim()) return null;
-	const n = Number(value);
-	return Number.isFinite(n) ? n : null;
-}
-
-function validate(form: PositionFormState) {
-	const errors: Partial<Record<keyof PositionFormState, string>> = {};
-
-	if (!form.name.trim()) errors.name = "Name is required";
-	const lat = parseNumber(form.lat);
-	const lon = parseNumber(form.lon);
-	if (lat === null) errors.lat = "Latitude must be a number";
-	if (lon === null) errors.lon = "Longitude must be a number";
-	if (lat !== null && (lat < -90 || lat > 90))
-		errors.lat = "Latitude must be between -90 and 90";
-	if (lon !== null && (lon < -180 || lon > 180))
-		errors.lon = "Longitude must be between -180 and 180";
-	if (!form.address.trim()) errors.address = "Address is required";
-
-	return errors;
-}
+import type { PositionsResponse } from "@/types/api";
+import type { Position } from "@/types/position";
+import { toForm, validate } from "./AdminPage.helper";
+import type { PositionFormState } from "./AdminPage.types";
 
 export default function AdminPage() {
 	const [rows, setRows] = useState<Position[]>([]);
@@ -109,7 +58,7 @@ export default function AdminPage() {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [deleting, setDeleting] = useState<Position | null>(null);
 
-	const apiBase = "http://localhost:51160/api/positions";
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
 
 	const showSnack = (
 		message: string,
@@ -119,14 +68,13 @@ export default function AdminPage() {
 	const loadAll = useCallback(async () => {
 		setLoading(true);
 		try {
-			const res = await fetch(`${apiBase}/all`, {
+			const res = await fetch(`${apiBaseUrl}/positions/all`, {
 				headers: { Accept: "application/json" },
 			});
 			if (!res.ok)
 				throw new Error(`Failed to load: ${res.status} ${res.statusText}`);
 
 			const data = (await res.json()) as PositionsResponse | Position[];
-			// Support both shapes: {positions:[...]} or direct array (just in case)
 			const list = Array.isArray(data) ? data : data.positions;
 
 			setRows(list ?? []);
@@ -195,7 +143,7 @@ export default function AdminPage() {
 		setActionLoading(true);
 		try {
 			if (mode === "create") {
-				const res = await fetch(`${apiBase}`, {
+				const res = await fetch(`${apiBaseUrl}/positions`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -213,7 +161,7 @@ export default function AdminPage() {
 			} else {
 				if (!editing) throw new Error("No item selected to edit");
 
-				const res = await fetch(`${apiBase}/${editing.id}`, {
+				const res = await fetch(`${apiBaseUrl}/positions/${editing.id}`, {
 					method: "PUT",
 					headers: {
 						"Content-Type": "application/json",
@@ -252,7 +200,7 @@ export default function AdminPage() {
 
 		setActionLoading(true);
 		try {
-			const res = await fetch(`${apiBase}/${deleting.id}`, {
+			const res = await fetch(`${apiBaseUrl}/positions/${deleting.id}`, {
 				method: "DELETE",
 			});
 			if (!res.ok && res.status !== 204)

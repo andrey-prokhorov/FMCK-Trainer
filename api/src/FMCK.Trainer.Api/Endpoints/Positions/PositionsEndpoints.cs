@@ -51,11 +51,22 @@ public static class PositionsEndpoints
     
     private static async Task<IResult> GetRandomPosition([FromServices] AppDbContext db)
     {
-        var pos = await db.Positions.AsNoTracking()
+        var position = await db.Positions.AsNoTracking()
             .OrderBy(r => EF.Functions.Random())
             .FirstOrDefaultAsync();
+            
+        if (position is null)
+            return Results.NotFound();
 
-        return pos is null ? Results.NotFound() : Results.Ok(pos);
+        var positionDto = new PositionDto
+        { Id = position.Id,
+            Name = position.Name,
+            Coordinates = position.Coordinates,
+            Sweref99Coordinates = CoordinateConverter.Convert(position.Coordinates),
+            Address = position.Address
+        };
+        
+        return Results.Ok(positionDto);
     }
 
     private static async Task<IResult> CreatePosition(

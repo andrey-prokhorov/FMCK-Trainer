@@ -12,33 +12,10 @@ import {
 	Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Position } from "@/types/position";
+import { normalize } from "./UppgiftPage.helper";
 
-type Coordinates = {
-	lat: number;
-	lon: number;
-};
-
-type Position = {
-	id: string;
-	name: string;
-	coordinates: Coordinates;
-	address: string;
-};
-
-function normalize(s: string) {
-	return (
-		s
-			.trim()
-			.toLowerCase()
-			// normalisera diakritiska tecken (åäö etc) och ta bort accenter
-			.normalize("NFD")
-			.replace(/[\u0300-\u036f]/g, "")
-			// ta bort extra whitespace
-			.replace(/\s+/g, " ")
-	);
-}
-
-export default function PositionsQuizPage() {
+export const UppgiftPage = () => {
 	const [position, setPosition] = useState<Position | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -54,8 +31,10 @@ export default function PositionsQuizPage() {
 		setShowHint(false);
 		setAnswer("");
 
+		const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+
 		try {
-			const res = await fetch("http://localhost:5116/api/positions", {
+			const res = await fetch(`${apiBaseUrl}/positions`, {
 				headers: { Accept: "application/json" },
 			});
 
@@ -65,7 +44,6 @@ export default function PositionsQuizPage() {
 
 			const data = (await res.json()) as Position;
 
-			// Skydd om API:t råkar returnera null/empty
 			if (!data?.id) {
 				throw new Error("API returned an unexpected payload.");
 			}
@@ -134,42 +112,31 @@ export default function PositionsQuizPage() {
 						{!loading && !error && position && (
 							<Stack spacing={2}>
 								<Typography variant="h6" fontWeight={700}>
-									Koordinater: (WGS-84)
+									Koordinater:
 								</Typography>
 
 								<Stack spacing={0.5}>
-									<Typography variant="body2" color="text.secondary">
-										Latitude
-									</Typography>
 									<Typography variant="body1" fontFamily="monospace">
-										{position.coordinates.lat}
-									</Typography>
-
-									<Typography
-										variant="body2"
-										color="text.secondary"
-										sx={{ mt: 1 }}
-									>
-										Longitude
-									</Typography>
-									<Typography variant="body1" fontFamily="monospace">
-										{position.coordinates.lon}
+										N{position.sweref99Coordinates.northing} E
+										{position.sweref99Coordinates.easting}
 									</Typography>
 								</Stack>
 
-								<Divider />
+								<Stack spacing={4}>
+									<Divider />
 
-								<TextField
-									label="Namn på platsen"
-									placeholder="Skriv namnet (t.ex. Akutmottagningen, Södersjukhuset)"
-									value={answer}
-									onChange={(e) => setAnswer(e.target.value)}
-									fullWidth
-									disabled={submitted}
-									onKeyDown={(e) => {
-										if (e.key === "Enter" && canSubmit) onSubmit();
-									}}
-								/>
+									<TextField
+										label="Namn på platsen"
+										placeholder="Skriv namnet (t.ex. Södersjukhuset)"
+										value={answer}
+										onChange={(e) => setAnswer(e.target.value)}
+										fullWidth
+										disabled={submitted}
+										onKeyDown={(e) => {
+											if (e.key === "Enter" && canSubmit) onSubmit();
+										}}
+									/>
+								</Stack>
 
 								<Stack direction="row" spacing={1} flexWrap="wrap">
 									<Button
@@ -207,7 +174,7 @@ export default function PositionsQuizPage() {
 								{submitted && (
 									<Alert severity={isCorrect ? "success" : "warning"}>
 										{isCorrect ? (
-											<>Rätt! 🎉</>
+											"Rätt! 🎉"
 										) : (
 											<>
 												Inte riktigt. Rätt svar är:{" "}
@@ -221,10 +188,10 @@ export default function PositionsQuizPage() {
 					</CardContent>
 				</Card>
 
-				<Typography variant="caption" color="text.secondary">
-					Tips: Matchningen är exakt men normaliserar whitespace och accenter.
-				</Typography>
+				{/* <Typography variant="caption" color="text.secondary">
+					Tips: Koordinater är SWEREF 99 TM. Matchningen är exakt men normaliserar whitespace och accenter.
+				</Typography> */}
 			</Stack>
 		</Container>
 	);
-}
+};

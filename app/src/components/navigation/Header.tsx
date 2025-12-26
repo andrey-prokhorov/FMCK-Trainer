@@ -1,7 +1,9 @@
 import CloseIcon from "@mui/icons-material/Close";
 import HomeIcon from "@mui/icons-material/Home";
+import InfoIcon from "@mui/icons-material/Info";
 import MenuIcon from "@mui/icons-material/Menu";
 import SettingsIcon from "@mui/icons-material/Settings";
+
 import {
 	AppBar,
 	Box,
@@ -103,6 +105,12 @@ export default function Header() {
 							to="/admin"
 							icon={<SettingsIcon />}
 							text="Admin"
+							close={close}
+						/>
+						<NavigationListItem
+							to="/about"
+							icon={<InfoIcon />}
+							text="Om appen"
 							close={close}
 						/>
 					</List>
