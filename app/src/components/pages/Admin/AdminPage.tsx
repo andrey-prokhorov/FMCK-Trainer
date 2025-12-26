@@ -78,10 +78,10 @@ export default function AdminPage() {
 			const list = Array.isArray(data) ? data : data.positions;
 
 			setRows(list ?? []);
-		} catch (e: any) {
+		} catch (e: unknown) {
 			setSnack({
 				open: true,
-				message: e?.message ?? "Failed to load positions",
+				message: (e as Error)?.message ?? "Failed to load positions",
 				severity: "error",
 			});
 		} finally {
@@ -177,8 +177,8 @@ export default function AdminPage() {
 				showSnack("Updated position", "success");
 				setDialogOpen(false);
 			}
-		} catch (e: any) {
-			showSnack(e?.message ?? "Save failed", "error");
+		} catch (e: unknown) {
+			showSnack((e as Error)?.message ?? "Save failed", "error");
 		} finally {
 			setActionLoading(false);
 		}
@@ -209,8 +209,8 @@ export default function AdminPage() {
 			setRows((prev) => prev.filter((p) => p.id !== deleting.id));
 			showSnack("Deleted position", "success");
 			closeDelete();
-		} catch (e: any) {
-			showSnack(e?.message ?? "Delete failed", "error");
+		} catch (e: unknown) {
+			showSnack((e as Error)?.message ?? "Delete failed", "error");
 		} finally {
 			setActionLoading(false);
 		}

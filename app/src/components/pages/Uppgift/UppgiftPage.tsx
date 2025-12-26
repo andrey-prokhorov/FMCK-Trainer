@@ -49,8 +49,8 @@ export const UppgiftPage = () => {
 			}
 
 			setPosition(data);
-		} catch (e: any) {
-			setError(e?.message ?? "Unknown error");
+		} catch (e: unknown) {
+			setError((e as Error)?.message ?? "Unknown error");
 			setPosition(null);
 		} finally {
 			setLoading(false);

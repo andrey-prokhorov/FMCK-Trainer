@@ -20,15 +20,28 @@ export const validate = (form: PositionFormState) => {
 	const errors: Partial<Record<keyof PositionFormState, string>> = {};
 
 	if (!form.name.trim()) errors.name = "Name is required";
+
 	const lat = parseNumber(form.lat);
 	const lon = parseNumber(form.lon);
-	if (lat === null) errors.lat = "Latitude must be a number";
-	if (lon === null) errors.lon = "Longitude must be a number";
-	if (lat !== null && (lat < -90 || lat > 90))
+
+	if (lat === null) {
+		errors.lat = "Latitude must be a number";
+	}
+	if (lon === null) {
+		errors.lon = "Longitude must be a number";
+	}
+
+	if (lat !== null && (lat < -90 || lat > 90)) {
 		errors.lat = "Latitude must be between -90 and 90";
-	if (lon !== null && (lon < -180 || lon > 180))
+	}
+
+	if (lon !== null && (lon < -180 || lon > 180)) {
 		errors.lon = "Longitude must be between -180 and 180";
-	if (!form.address.trim()) errors.address = "Address is required";
+	}
+
+	if (!form.address.trim()) {
+		errors.address = "Address is required";
+	}
 
 	return errors;
 };
