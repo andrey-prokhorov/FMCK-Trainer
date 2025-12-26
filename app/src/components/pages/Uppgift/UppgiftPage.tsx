@@ -12,8 +12,8 @@ import {
 	Typography,
 } from "@mui/material"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { checkAnswer, fetchUppgiftPosition } from "@/api/client"
 import type { Position } from "@/types/position"
-import { normalize } from "./UppgiftPage.helper"
 
 export const UppgiftPage = () => {
 	const [position, setPosition] = useState<Position | null>(null)
@@ -23,6 +23,8 @@ export const UppgiftPage = () => {
 	const [answer, setAnswer] = useState("")
 	const [submitted, setSubmitted] = useState(false)
 	const [showHint, setShowHint] = useState(false)
+	const [checking, setChecking] = useState(false)
+	const [isCorrect, setIsCorrect] = useState(false)
 
 	const fetchRandomPosition = useCallback(async () => {
 		setLoading(true)
@@ -30,23 +32,11 @@ export const UppgiftPage = () => {
 		setSubmitted(false)
 		setShowHint(false)
 		setAnswer("")
-
-		const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ""
+		setChecking(false)
+		setIsCorrect(false)
 
 		try {
-			const res = await fetch(`${apiBaseUrl}/positions`, {
-				headers: { Accept: "application/json" },
-			})
-
-			if (!res.ok) {
-				throw new Error(`Request failed: ${res.status} ${res.statusText}`)
-			}
-
-			const data = (await res.json()) as Position
-
-			if (!data?.id) {
-				throw new Error("API returned an unexpected payload.")
-			}
+			const data = await fetchUppgiftPosition()
 
 			setPosition(data)
 		} catch (e: unknown) {
@@ -61,16 +51,27 @@ export const UppgiftPage = () => {
 		fetchRandomPosition()
 	}, [fetchRandomPosition])
 
-	const isCorrect = useMemo(() => {
-		if (!submitted || !position) return false
-		return normalize(answer) === normalize(position.name)
-	}, [submitted, answer, position])
-
 	const canSubmit = useMemo(() => {
-		return !!position && !loading && answer.trim().length > 0 && !submitted
-	}, [position, loading, answer, submitted])
+		return !!position && !loading && !checking && answer.trim().length > 0
+	}, [position, loading, checking, answer])
 
-	const onSubmit = () => setSubmitted(true)
+	const onSubmit = async () => {
+		if (!position) return
+
+		setChecking(true)
+		setSubmitted(true)
+
+		try {
+			const result = await checkAnswer(position.id, answer)
+
+			setIsCorrect(result)
+		} catch (e: unknown) {
+			setError((e as Error)?.message ?? "Failed to check answer")
+			setSubmitted(false)
+		} finally {
+			setChecking(false)
+		}
+	}
 
 	const onNext = () => fetchRandomPosition()
 
@@ -126,7 +127,7 @@ export const UppgiftPage = () => {
 										value={answer}
 										onChange={(e) => setAnswer(e.target.value)}
 										fullWidth
-										disabled={submitted}
+										disabled={loading || checking}
 										onKeyDown={(e) => {
 											if (e.key === "Enter" && canSubmit) onSubmit()
 										}}
@@ -135,18 +136,16 @@ export const UppgiftPage = () => {
 
 								<Stack direction="row" spacing={1} flexWrap="wrap">
 									<Button variant="contained" onClick={onSubmit} disabled={!canSubmit}>
-										Svara
+										{checking ? "Kontrollerar..." : "Svara"}
 									</Button>
 
-									<Button
-										variant="outlined"
-										onClick={() => setShowHint((v) => !v)}
-										disabled={submitted === false && !position}
-									>
-										{showHint ? "Dölj ledtråd" : "Visa ledtråd"}
-									</Button>
+									{submitted && (
+										<Button variant="outlined" onClick={() => setShowHint((v) => !v)}>
+											{showHint ? "Dölj ledtråd" : "Visa ledtråd"}
+										</Button>
+									)}
 
-									<Button variant="text" onClick={onNext} disabled={loading}>
+									<Button variant="text" onClick={onNext} disabled={loading || checking}>
 										Ny uppgift
 									</Button>
 								</Stack>
@@ -163,24 +162,16 @@ export const UppgiftPage = () => {
 								)}
 
 								{submitted && (
-									<Alert severity={isCorrect ? "success" : "warning"}>
-										{isCorrect ? (
-											"Rätt! 🎉"
-										) : (
-											<>
-												Inte riktigt. Rätt svar är: <strong>{position.name}</strong>
-											</>
-										)}
-									</Alert>
+									<Alert severity={isCorrect ? "success" : "warning"}>{isCorrect ? "Rätt! 🎉" : "Inte riktigt."}</Alert>
 								)}
 							</Stack>
 						)}
 					</CardContent>
 				</Card>
 
-				{/* <Typography variant="caption" color="text.secondary">
-					Tips: Koordinater är SWEREF 99 TM. Matchningen är exakt men normaliserar whitespace och accenter.
-				</Typography> */}
+				<Typography variant="caption" color="text.secondary">
+					Koordinater är SWEREF 99 TM.
+				</Typography>
 			</Stack>
 		</Container>
 	)

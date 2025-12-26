@@ -13,3 +13,13 @@ Accept: application/json
 
 GET {{FMCK_Trainer_Api_HostAddress}}/api/positions/f4e0d8b4-860c-4ecc-8df4-ca928924d696
 Accept: application/json
+
+###
+
+POST {{FMCK_Trainer_Api_HostAddress}}/api/positions/check
+Content-Type: application/json
+
+{
+  "id": "ad018127-cc46-46b2-b10d-5943712b56a3",
+  "name": "Akutmottagningen, Södersjukhuset"
+}

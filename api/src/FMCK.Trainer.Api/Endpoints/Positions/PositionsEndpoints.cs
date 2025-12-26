@@ -18,54 +18,56 @@ public static class PositionsEndpoints
         group.MapGet("/", GetRandomPosition);
 
         group.MapPost("/", CreatePosition);
+        group.MapPost("/check", CheckPosition);
         group.MapPut("/{id:guid}", UpdatePosition);
-        group.MapDelete("/{id:guid}", DeletePosition);        
+        group.MapDelete("/{id:guid}", DeletePosition);
     }
 
     private record CreatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
 
     private record UpdatePositionRequest(string Name, Wgs84Coordinates Coordinates, string Address);
 
+    private record CheckPositionRequest(Guid Id, string Name);
+
     private static async Task<IResult> GetAll([FromServices] AppDbContext db)
     {
         var positions = await db.Positions
             .AsNoTracking()
-            .Select(p => new PositionDto
+            .Select(p => new Position
             {
                 Id = p.Id,
                 Name = p.Name,
                 Coordinates = p.Coordinates,
-                Sweref99Coordinates = CoordinateConverter.Convert(p.Coordinates),
                 Address = p.Address
             })
             .ToListAsync();
 
         return Results.Ok(positions);
     }
-    
+
     private static async Task<IResult> GetById([FromServices] AppDbContext db, Guid id)
     {
         var pos = await db.Positions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         return pos is null ? Results.NotFound() : Results.Ok(pos);
     }
-    
+
     private static async Task<IResult> GetRandomPosition([FromServices] AppDbContext db)
     {
         var position = await db.Positions.AsNoTracking()
             .OrderBy(r => EF.Functions.Random())
             .FirstOrDefaultAsync();
-            
+
         if (position is null)
             return Results.NotFound();
 
-        var positionDto = new PositionDto
-        { Id = position.Id,
-            Name = position.Name,
-            Coordinates = position.Coordinates,
+        var positionDto = new UppgiftPositionDto
+        {
+            Id = position.Id,
+            Wgs84Coordinates = position.Coordinates,
             Sweref99Coordinates = CoordinateConverter.Convert(position.Coordinates),
             Address = position.Address
         };
-        
+
         return Results.Ok(positionDto);
     }
 
@@ -113,5 +115,13 @@ public static class PositionsEndpoints
         await db.SaveChangesAsync();
 
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> CheckPosition(
+        [FromServices] AppDbContext db,
+        [FromBody] CheckPositionRequest req)
+    {
+        var exists = await db.Positions.AnyAsync(p => p.Id == req.Id && p.Name == req.Name);
+        return Results.Ok(new { Correct = exists });
     }
 }
