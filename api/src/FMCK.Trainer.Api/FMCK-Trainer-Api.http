@@ -1,5 +1,11 @@
 @FMCK_Trainer_Api_HostAddress = http://localhost:5116
 
+
+GET {{FMCK_Trainer_Api_HostAddress}}/health
+Accept: application/json
+
+###
+
 GET {{FMCK_Trainer_Api_HostAddress}}/api/positions/all
 Accept: application/json
 

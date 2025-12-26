@@ -19,12 +19,12 @@ jobs:
         working-directory: api
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Show directory tree (depth 4)
-        run: tree -L 4      
-        
+        run: tree -L 4
+
       - name: Show current working directory
-        run: pwd        
+        run: pwd
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -41,30 +41,31 @@ jobs:
         run: dotnet test --no-build -c Release
 
   frontend-tests:
-      name: Frontend (Vitest) unit tests
-      runs-on: ubuntu-latest
-      defaults:
-        run:
-          working-directory: app
-      steps:
-        - uses: actions/checkout@v4
+    name: Frontend (Vitest) unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Setup Node
-          uses: actions/setup-node@v4
-          with:
-            node-version: "25"
-            cache: "npm"
-            cache-dependency-path: app/package-lock.json
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: app/package-lock.json
 
-        - name: Install dependencies
-          run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-        - name: Unit tests (Vitest)
-          run: npm run test:ci
-          
+      - name: Unit tests (Vitest)
+        run: npm run test:ci
+
   playwright-e2e:
     name: Frontend (Playwright) E2E tests
     runs-on: ubuntu-latest
+    needs: [frontend-tests]
     defaults:
       run:
         working-directory: app
@@ -97,52 +98,55 @@ jobs:
           path: app/playwright-report/
           retention-days: 30
 
+  newman-api-tests:
+    name: Postman (Newman) API tests
+    runs-on: ubuntu-latest
+    needs: [backend-tests]
+    steps:
+      - uses: actions/checkout@v4
 
-  # newman-api-tests:
-    # name: Postman (Newman) API tests
-    # runs-on: ubuntu-latest
-    # needs: [backend-tests]
-    # steps:
-      # - uses: actions/checkout@v4
+      - name: Setup Node (LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
 
-      # - name: Setup Node
-        # uses: actions/setup-node@v4
-        # with:
-          # node-version: "25"
+      - name: Install Newman + wait-on
+        run: npm i -g newman wait-on
 
-      # - name: Install Newman + wait-on
-        # run: npm i -g newman wait-on
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
 
-      # # --- Start API on 5116 ---
-      # - name: Setup .NET
-        # uses: actions/setup-dotnet@v4
-        # with:
-          # dotnet-version: "8.0.x"
+      - name: Publish API
+        run: |
+          dotnet restore api/src/FMCK.Trainer.Api/FMCK.Trainer.Api.csproj
+          dotnet publish api/src/FMCK.Trainer.Api/FMCK.Trainer.Api.csproj \
+            -c Release -o api_out
 
-      # - name: Build API
-        # working-directory: api
-        # run: |
-          # dotnet restore
-          # dotnet build -c Release
+      - name: Show directory tree (depth 4)
+        run: tree -L 4
 
-      # - name: Start API (background)
-        # working-directory: api
-        # run: |
-          # nohup dotnet run -c Release --urls http://localhost:5116 > api.log 2>&1 &
+      - name: Start API
+        working-directory: ./api_out
+        run: |
+          nohup dotnet FMCK.Trainer.Api.dll \
+            --urls http://127.0.0.1:5116 > api.log 2>&1 &
+          echo $! > api.pid
 
-      # - name: Wait for API
-        # run: wait-on http://localhost:5116/health -t 120000
+      - name: Wait for API
+        run: wait-on tcp:127.0.0.1:5116 -t 60000
 
-      # # --- Run Postman collection ---
-      # - name: Run Newman collection
-        # run: |
-          # newman run postman/collection.json \
-            # --env-var baseUrl=http://localhost:5116 \
-            # --reporters cli
+      - name: Run Newman collection
+        working-directory: api/src/FMCK.Trainer.Api/Postman
+        run: |
+          newman run collection.json \
+            --env-var FMCK_Trainer_Api_HostAddress=http://127.0.0.1:5116 \
+            --reporters cli
 
-      # - name: Upload api log (optional)
-        # if: always()
-        # uses: actions/upload-artifact@v4
-        # with:
-          # name: newman-logs
-          # path: api/api.log
+      - name: Stop API
+        if: always()
+        run: |
+          if [ -f api.pid ]; then
+            kill "$(cat api.pid)" || true
+          fi

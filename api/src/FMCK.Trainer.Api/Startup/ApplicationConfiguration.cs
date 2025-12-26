@@ -1,6 +1,7 @@
 ﻿using FMCK_Trainer_Api.Startup;
 using FMCK.Trainer.Api.Data.Seed;
 using FMCK.Trainer.Api.Endpoints.Positions;
+using FMCK.Trainer.Api.Endpoints.Health;
 
 namespace FMCK.Trainer.Api.Startup;
 
@@ -20,7 +21,8 @@ public static class ApplicationConfiguration
 
         var api = app.MapGroup("/api");
 
-        api.MapEndpoints();
+        PositionsEndpoints.MapEndpoints(api);
+        HealthEndpoints.MapEndpoints(app);
 
         await PositionsSeeder.SeedAsync(app.Services, app.Environment);
     }

@@ -18,4 +18,10 @@
         <PackageReference Include="Programmerare.CrsTransformations.Constants" Version="10.36.0"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="Data\Seed\positions.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

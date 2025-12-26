@@ -1,0 +1,110 @@
+{
+  "info": {
+    "name": "FMCK Trainer API",
+    "description": "Postman collection generated from FMCK Trainer API HTTP requests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "FMCK_Trainer_Api_HostAddress",
+      "value": "http://localhost:5116"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get all positions (all)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{FMCK_Trainer_Api_HostAddress}}/api/positions/all",
+          "host": [
+            "{{FMCK_Trainer_Api_HostAddress}}"
+          ],
+          "path": [
+            "api",
+            "positions",
+            "all"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get positions",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{FMCK_Trainer_Api_HostAddress}}/api/positions",
+          "host": [
+            "{{FMCK_Trainer_Api_HostAddress}}"
+          ],
+          "path": [
+            "api",
+            "positions"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get position by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{FMCK_Trainer_Api_HostAddress}}/api/positions/f4e0d8b4-860c-4ecc-8df4-ca928924d696",
+          "host": [
+            "{{FMCK_Trainer_Api_HostAddress}}"
+          ],
+          "path": [
+            "api",
+            "positions",
+            "f4e0d8b4-860c-4ecc-8df4-ca928924d696"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Check position",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"ad018127-cc46-46b2-b10d-5943712b56a3\",\n  \"name\": \"Akutmottagningen, Södersjukhuset\"\n}"
+        },
+        "url": {
+          "raw": "{{FMCK_Trainer_Api_HostAddress}}/api/positions/check",
+          "host": [
+            "{{FMCK_Trainer_Api_HostAddress}}"
+          ],
+          "path": [
+            "api",
+            "positions",
+            "check"
+          ]
+        }
+      }
+    }
+  ]
+}
