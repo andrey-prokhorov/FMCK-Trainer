@@ -8,11 +8,11 @@
     "preview": "vite preview",
     "lint": "biome lint",
     "check": "biome check",
-    "format": "prettier --write .",
     "test": "vitest",
     "test:ci": "vitest run",
     "test:ui": "vitest --ui",
-    "coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage",
+    "format": "biome format --write"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -40,7 +40,6 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
     "jsdom": "^27.4.0",
-    "prettier": "^3.7.4",
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
     "vitest": "^3.2.4",

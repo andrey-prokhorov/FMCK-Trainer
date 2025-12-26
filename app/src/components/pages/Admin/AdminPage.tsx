@@ -1,7 +1,7 @@
-import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import AddIcon from "@mui/icons-material/Add"
+import DeleteIcon from "@mui/icons-material/Delete"
+import EditIcon from "@mui/icons-material/Edit"
+import RefreshIcon from "@mui/icons-material/Refresh"
 import {
 	Alert,
 	Box,
@@ -25,122 +25,115 @@ import {
 	TextField,
 	Tooltip,
 	Typography,
-} from "@mui/material";
-import type React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { PositionsResponse } from "@/types/api";
-import type { Position } from "@/types/position";
-import { toForm, validate } from "./AdminPage.helper";
-import type { PositionFormState } from "./AdminPage.types";
+} from "@mui/material"
+import type React from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import type { PositionsResponse } from "@/types/api"
+import type { Position } from "@/types/position"
+import { toForm, validate } from "./AdminPage.helper"
+import type { PositionFormState } from "./AdminPage.types"
 
 export default function AdminPage() {
-	const [rows, setRows] = useState<Position[]>([]);
-	const [loading, setLoading] = useState(false);
-	const [actionLoading, setActionLoading] = useState(false);
+	const [rows, setRows] = useState<Position[]>([])
+	const [loading, setLoading] = useState(false)
+	const [actionLoading, setActionLoading] = useState(false)
 
 	const [snack, setSnack] = useState<{
-		open: boolean;
-		message: string;
-		severity: "success" | "error" | "info";
-	}>({ open: false, message: "", severity: "info" });
+		open: boolean
+		message: string
+		severity: "success" | "error" | "info"
+	}>({ open: false, message: "", severity: "info" })
 
 	// Dialog state
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [mode, setMode] = useState<"create" | "edit">("create");
-	const [editing, setEditing] = useState<Position | null>(null);
+	const [dialogOpen, setDialogOpen] = useState(false)
+	const [mode, setMode] = useState<"create" | "edit">("create")
+	const [editing, setEditing] = useState<Position | null>(null)
 
-	const [form, setForm] = useState<PositionFormState>(toForm());
-	const [errors, setErrors] = useState<
-		Partial<Record<keyof PositionFormState, string>>
-	>({});
+	const [form, setForm] = useState<PositionFormState>(toForm())
+	const [errors, setErrors] = useState<Partial<Record<keyof PositionFormState, string>>>({})
 
 	// Delete confirm
-	const [deleteOpen, setDeleteOpen] = useState(false);
-	const [deleting, setDeleting] = useState<Position | null>(null);
+	const [deleteOpen, setDeleteOpen] = useState(false)
+	const [deleting, setDeleting] = useState<Position | null>(null)
 
-	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+	const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ""
 
-	const showSnack = (
-		message: string,
-		severity: "success" | "error" | "info" = "info",
-	) => setSnack({ open: true, message, severity });
+	const showSnack = (message: string, severity: "success" | "error" | "info" = "info") =>
+		setSnack({ open: true, message, severity })
 
 	const loadAll = useCallback(async () => {
-		setLoading(true);
+		setLoading(true)
 		try {
 			const res = await fetch(`${apiBaseUrl}/positions/all`, {
 				headers: { Accept: "application/json" },
-			});
-			if (!res.ok)
-				throw new Error(`Failed to load: ${res.status} ${res.statusText}`);
+			})
+			if (!res.ok) throw new Error(`Failed to load: ${res.status} ${res.statusText}`)
 
-			const data = (await res.json()) as PositionsResponse | Position[];
-			const list = Array.isArray(data) ? data : data.positions;
+			const data = (await res.json()) as PositionsResponse | Position[]
+			const list = Array.isArray(data) ? data : data.positions
 
-			setRows(list ?? []);
+			setRows(list ?? [])
 		} catch (e: unknown) {
 			setSnack({
 				open: true,
 				message: (e as Error)?.message ?? "Failed to load positions",
 				severity: "error",
-			});
+			})
 		} finally {
-			setLoading(false);
+			setLoading(false)
 		}
-	}, []);
+	}, [])
 
 	useEffect(() => {
-		loadAll();
-	}, [loadAll]);
+		loadAll()
+	}, [loadAll])
 
 	const openCreate = () => {
-		setMode("create");
-		setEditing(null);
-		setForm(toForm());
-		setErrors({});
-		setDialogOpen(true);
-	};
+		setMode("create")
+		setEditing(null)
+		setForm(toForm())
+		setErrors({})
+		setDialogOpen(true)
+	}
 
 	const openEdit = (p: Position) => {
-		setMode("edit");
-		setEditing(p);
-		setForm(toForm(p));
-		setErrors({});
-		setDialogOpen(true);
-	};
+		setMode("edit")
+		setEditing(p)
+		setForm(toForm(p))
+		setErrors({})
+		setDialogOpen(true)
+	}
 
 	const closeDialog = () => {
-		if (actionLoading) return;
-		setDialogOpen(false);
-	};
+		if (actionLoading) return
+		setDialogOpen(false)
+	}
 
-	const onChange =
-		(key: keyof PositionFormState) =>
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			setForm((prev) => ({ ...prev, [key]: e.target.value }));
-			setErrors((prev) => ({ ...prev, [key]: undefined }));
-		};
+	const onChange = (key: keyof PositionFormState) => (e: React.ChangeEvent<HTMLInputElement>) => {
+		setForm((prev) => ({ ...prev, [key]: e.target.value }))
+		setErrors((prev) => ({ ...prev, [key]: undefined }))
+	}
 
 	const canSubmit = useMemo(() => {
-		const errs = validate(form);
-		return Object.keys(errs).length === 0 && !actionLoading;
-	}, [form, actionLoading]);
+		const errs = validate(form)
+		return Object.keys(errs).length === 0 && !actionLoading
+	}, [form, actionLoading])
 
 	const submit = async () => {
-		const errs = validate(form);
-		setErrors(errs);
-		if (Object.keys(errs).length > 0) return;
+		const errs = validate(form)
+		setErrors(errs)
+		if (Object.keys(errs).length > 0) return
 
-		const lat = Number(form.lat);
-		const lon = Number(form.lon);
+		const lat = Number(form.lat)
+		const lon = Number(form.lon)
 
 		const payload = {
 			name: form.name.trim(),
 			coordinates: { lat, lon },
 			address: form.address.trim(),
-		};
+		}
 
-		setActionLoading(true);
+		setActionLoading(true)
 		try {
 			if (mode === "create") {
 				const res = await fetch(`${apiBaseUrl}/positions`, {
@@ -150,16 +143,15 @@ export default function AdminPage() {
 						Accept: "application/json",
 					},
 					body: JSON.stringify(payload),
-				});
-				if (!res.ok)
-					throw new Error(`Create failed: ${res.status} ${res.statusText}`);
-				const created = (await res.json()) as Position;
+				})
+				if (!res.ok) throw new Error(`Create failed: ${res.status} ${res.statusText}`)
+				const created = (await res.json()) as Position
 
-				setRows((prev) => [created, ...prev]);
-				showSnack("Created position", "success");
-				setDialogOpen(false);
+				setRows((prev) => [created, ...prev])
+				showSnack("Created position", "success")
+				setDialogOpen(false)
 			} else {
-				if (!editing) throw new Error("No item selected to edit");
+				if (!editing) throw new Error("No item selected to edit")
 
 				const res = await fetch(`${apiBaseUrl}/positions/${editing.id}`, {
 					method: "PUT",
@@ -168,63 +160,56 @@ export default function AdminPage() {
 						Accept: "application/json",
 					},
 					body: JSON.stringify(payload),
-				});
-				if (!res.ok)
-					throw new Error(`Update failed: ${res.status} ${res.statusText}`);
-				const updated = (await res.json()) as Position;
+				})
+				if (!res.ok) throw new Error(`Update failed: ${res.status} ${res.statusText}`)
+				const updated = (await res.json()) as Position
 
-				setRows((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
-				showSnack("Updated position", "success");
-				setDialogOpen(false);
+				setRows((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
+				showSnack("Updated position", "success")
+				setDialogOpen(false)
 			}
 		} catch (e: unknown) {
-			showSnack((e as Error)?.message ?? "Save failed", "error");
+			showSnack((e as Error)?.message ?? "Save failed", "error")
 		} finally {
-			setActionLoading(false);
+			setActionLoading(false)
 		}
-	};
+	}
 
 	const openDelete = (p: Position) => {
-		setDeleting(p);
-		setDeleteOpen(true);
-	};
+		setDeleting(p)
+		setDeleteOpen(true)
+	}
 
 	const closeDelete = () => {
-		if (actionLoading) return;
-		setDeleteOpen(false);
-		setDeleting(null);
-	};
+		if (actionLoading) return
+		setDeleteOpen(false)
+		setDeleting(null)
+	}
 
 	const confirmDelete = async () => {
-		if (!deleting) return;
+		if (!deleting) return
 
-		setActionLoading(true);
+		setActionLoading(true)
 		try {
 			const res = await fetch(`${apiBaseUrl}/positions/${deleting.id}`, {
 				method: "DELETE",
-			});
-			if (!res.ok && res.status !== 204)
-				throw new Error(`Delete failed: ${res.status} ${res.statusText}`);
+			})
+			if (!res.ok && res.status !== 204) throw new Error(`Delete failed: ${res.status} ${res.statusText}`)
 
-			setRows((prev) => prev.filter((p) => p.id !== deleting.id));
-			showSnack("Deleted position", "success");
-			closeDelete();
+			setRows((prev) => prev.filter((p) => p.id !== deleting.id))
+			showSnack("Deleted position", "success")
+			closeDelete()
 		} catch (e: unknown) {
-			showSnack((e as Error)?.message ?? "Delete failed", "error");
+			showSnack((e as Error)?.message ?? "Delete failed", "error")
 		} finally {
-			setActionLoading(false);
+			setActionLoading(false)
 		}
-	};
+	}
 
 	return (
 		<Container maxWidth="lg" sx={{ py: 4 }}>
 			<Stack spacing={2}>
-				<Stack
-					direction="row"
-					alignItems="center"
-					justifyContent="space-between"
-					spacing={2}
-				>
+				<Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2}>
 					<Box>
 						<Typography variant="h4" fontWeight={800}>
 							Positions admin
@@ -237,21 +222,13 @@ export default function AdminPage() {
 					<Stack direction="row" spacing={1}>
 						<Tooltip title="Reload">
 							<span>
-								<IconButton
-									onClick={loadAll}
-									disabled={loading || actionLoading}
-								>
+								<IconButton onClick={loadAll} disabled={loading || actionLoading}>
 									<RefreshIcon />
 								</IconButton>
 							</span>
 						</Tooltip>
 
-						<Button
-							variant="contained"
-							startIcon={<AddIcon />}
-							onClick={openCreate}
-							disabled={actionLoading}
-						>
+						<Button variant="contained" startIcon={<AddIcon />} onClick={openCreate} disabled={actionLoading}>
 							Add new
 						</Button>
 					</Stack>
@@ -296,32 +273,20 @@ export default function AdminPage() {
 										{rows.map((p) => (
 											<TableRow key={p.id} hover>
 												<TableCell sx={{ fontWeight: 600 }}>{p.name}</TableCell>
-												<TableCell sx={{ fontFamily: "monospace" }}>
-													{p.coordinates.lat}
-												</TableCell>
-												<TableCell sx={{ fontFamily: "monospace" }}>
-													{p.coordinates.lon}
-												</TableCell>
+												<TableCell sx={{ fontFamily: "monospace" }}>{p.coordinates.lat}</TableCell>
+												<TableCell sx={{ fontFamily: "monospace" }}>{p.coordinates.lon}</TableCell>
 												<TableCell>{p.address}</TableCell>
 												<TableCell align="right">
 													<Tooltip title="Edit">
 														<span>
-															<IconButton
-																size="small"
-																onClick={() => openEdit(p)}
-																disabled={actionLoading}
-															>
+															<IconButton size="small" onClick={() => openEdit(p)} disabled={actionLoading}>
 																<EditIcon fontSize="small" />
 															</IconButton>
 														</span>
 													</Tooltip>
 													<Tooltip title="Delete">
 														<span>
-															<IconButton
-																size="small"
-																onClick={() => openDelete(p)}
-																disabled={actionLoading}
-															>
+															<IconButton size="small" onClick={() => openDelete(p)} disabled={actionLoading}>
 																<DeleteIcon fontSize="small" />
 															</IconButton>
 														</span>
@@ -339,9 +304,7 @@ export default function AdminPage() {
 
 			{/* Create/Edit dialog */}
 			<Dialog open={dialogOpen} onClose={closeDialog} fullWidth maxWidth="sm">
-				<DialogTitle sx={{ fontWeight: 800 }}>
-					{mode === "create" ? "Add position" : "Edit position"}
-				</DialogTitle>
+				<DialogTitle sx={{ fontWeight: 800 }}>{mode === "create" ? "Add position" : "Edit position"}</DialogTitle>
 				<DialogContent>
 					<Stack spacing={2} sx={{ mt: 1 }}>
 						<TextField
@@ -402,20 +365,13 @@ export default function AdminPage() {
 					<Typography variant="body2" color="text.secondary">
 						This will permanently remove:
 					</Typography>
-					<Typography sx={{ mt: 1, fontWeight: 700 }}>
-						{deleting?.name}
-					</Typography>
+					<Typography sx={{ mt: 1, fontWeight: 700 }}>{deleting?.name}</Typography>
 				</DialogContent>
 				<DialogActions sx={{ px: 3, pb: 2 }}>
 					<Button onClick={closeDelete} disabled={actionLoading}>
 						Cancel
 					</Button>
-					<Button
-						variant="contained"
-						color="error"
-						onClick={confirmDelete}
-						disabled={actionLoading}
-					>
+					<Button variant="contained" color="error" onClick={confirmDelete} disabled={actionLoading}>
 						{actionLoading ? "Deleting..." : "Delete"}
 					</Button>
 				</DialogActions>
@@ -436,5 +392,5 @@ export default function AdminPage() {
 				</Alert>
 			</Snackbar>
 		</Container>
-	);
+	)
 }

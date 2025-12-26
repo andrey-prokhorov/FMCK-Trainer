@@ -1,22 +1,17 @@
 //NavigationListItem
 
-import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
-import { Link } from "@tanstack/react-router";
-import type React from "react";
+import { ListItemButton, ListItemIcon, ListItemText } from "@mui/material"
+import { Link } from "@tanstack/react-router"
+import type React from "react"
 
 interface NavigationListItemProps {
-	to: string;
-	icon: React.ReactElement;
-	text: string;
-	close: () => void;
+	to: string
+	icon: React.ReactElement
+	text: string
+	close: () => void
 }
 
-export default function NavigationListItem({
-	to,
-	icon,
-	text,
-	close,
-}: NavigationListItemProps) {
+export default function NavigationListItem({ to, icon, text, close }: NavigationListItemProps) {
 	return (
 		<Link
 			to={to}
@@ -37,12 +32,10 @@ export default function NavigationListItem({
 						},
 					}}
 				>
-					<ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
-						{icon}
-					</ListItemIcon>
+					<ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>{icon}</ListItemIcon>
 					<ListItemText primary={text} sx={{ fontWeight: 600 }} />
 				</ListItemButton>
 			)}
 		</Link>
-	);
+	)
 }

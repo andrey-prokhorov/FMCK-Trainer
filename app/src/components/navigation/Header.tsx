@@ -1,41 +1,27 @@
-import CloseIcon from "@mui/icons-material/Close";
-import HomeIcon from "@mui/icons-material/Home";
-import InfoIcon from "@mui/icons-material/Info";
-import MenuIcon from "@mui/icons-material/Menu";
-import SettingsIcon from "@mui/icons-material/Settings";
+import CloseIcon from "@mui/icons-material/Close"
+import HomeIcon from "@mui/icons-material/Home"
+import InfoIcon from "@mui/icons-material/Info"
+import MenuIcon from "@mui/icons-material/Menu"
+import SettingsIcon from "@mui/icons-material/Settings"
 
-import {
-	AppBar,
-	Box,
-	Divider,
-	Drawer,
-	IconButton,
-	List,
-	Toolbar,
-	Typography,
-} from "@mui/material";
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
-import NavigationListItem from "./NavigationListItem";
+import { AppBar, Box, Divider, Drawer, IconButton, List, Toolbar, Typography } from "@mui/material"
+import { Link } from "@tanstack/react-router"
+import { useState } from "react"
+import NavigationListItem from "./NavigationListItem"
 
-const drawerWidth = 320;
+const drawerWidth = 320
 
 export default function Header() {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isOpen, setIsOpen] = useState(false)
 
-	const close = () => setIsOpen(false);
-	const open = () => setIsOpen(true);
+	const close = () => setIsOpen(false)
+	const open = () => setIsOpen(true)
 
 	return (
 		<>
 			<AppBar position="static" color="default" elevation={4}>
 				<Toolbar sx={{ bgcolor: "#1f2937", color: "white" }}>
-					<IconButton
-						edge="start"
-						onClick={open}
-						aria-label="Open menu"
-						sx={{ color: "inherit" }}
-					>
+					<IconButton edge="start" onClick={open} aria-label="Open menu" sx={{ color: "inherit" }}>
 						<MenuIcon />
 					</IconButton>
 
@@ -56,11 +42,7 @@ export default function Header() {
 								alignItems: "center",
 							}}
 						>
-							<img
-								src="/logo.webp"
-								alt="FRIVILLIGA MOTORCYKELKÅREN"
-								style={{ height: 40, display: "block" }}
-							/>
+							<img src="/logo.webp" alt="FRIVILLIGA MOTORCYKELKÅREN" style={{ height: 40, display: "block" }} />
 						</Link>
 						FMCK Trainer
 					</Typography>
@@ -82,11 +64,7 @@ export default function Header() {
 						Navigation
 					</Typography>
 
-					<IconButton
-						onClick={close}
-						aria-label="Close menu"
-						sx={{ color: "inherit" }}
-					>
+					<IconButton onClick={close} aria-label="Close menu" sx={{ color: "inherit" }}>
 						<CloseIcon />
 					</IconButton>
 				</Box>
@@ -95,27 +73,12 @@ export default function Header() {
 
 				<Box sx={{ p: 1, overflowY: "auto", flex: 1 }}>
 					<List disablePadding>
-						<NavigationListItem
-							to="/"
-							icon={<HomeIcon />}
-							text="Uppgift"
-							close={close}
-						/>
-						<NavigationListItem
-							to="/admin"
-							icon={<SettingsIcon />}
-							text="Admin"
-							close={close}
-						/>
-						<NavigationListItem
-							to="/about"
-							icon={<InfoIcon />}
-							text="Om appen"
-							close={close}
-						/>
+						<NavigationListItem to="/" icon={<HomeIcon />} text="Uppgift" close={close} />
+						<NavigationListItem to="/admin" icon={<SettingsIcon />} text="Admin" close={close} />
+						<NavigationListItem to="/about" icon={<InfoIcon />} text="Om appen" close={close} />
 					</List>
 				</Box>
 			</Drawer>
 		</>
-	);
+	)
 }

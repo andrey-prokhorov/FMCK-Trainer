@@ -10,69 +10,69 @@ import {
 	Stack,
 	TextField,
 	Typography,
-} from "@mui/material";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { Position } from "@/types/position";
-import { normalize } from "./UppgiftPage.helper";
+} from "@mui/material"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import type { Position } from "@/types/position"
+import { normalize } from "./UppgiftPage.helper"
 
 export const UppgiftPage = () => {
-	const [position, setPosition] = useState<Position | null>(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const [position, setPosition] = useState<Position | null>(null)
+	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState<string | null>(null)
 
-	const [answer, setAnswer] = useState("");
-	const [submitted, setSubmitted] = useState(false);
-	const [showHint, setShowHint] = useState(false);
+	const [answer, setAnswer] = useState("")
+	const [submitted, setSubmitted] = useState(false)
+	const [showHint, setShowHint] = useState(false)
 
 	const fetchRandomPosition = useCallback(async () => {
-		setLoading(true);
-		setError(null);
-		setSubmitted(false);
-		setShowHint(false);
-		setAnswer("");
+		setLoading(true)
+		setError(null)
+		setSubmitted(false)
+		setShowHint(false)
+		setAnswer("")
 
-		const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || "";
+		const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ""
 
 		try {
 			const res = await fetch(`${apiBaseUrl}/positions`, {
 				headers: { Accept: "application/json" },
-			});
+			})
 
 			if (!res.ok) {
-				throw new Error(`Request failed: ${res.status} ${res.statusText}`);
+				throw new Error(`Request failed: ${res.status} ${res.statusText}`)
 			}
 
-			const data = (await res.json()) as Position;
+			const data = (await res.json()) as Position
 
 			if (!data?.id) {
-				throw new Error("API returned an unexpected payload.");
+				throw new Error("API returned an unexpected payload.")
 			}
 
-			setPosition(data);
+			setPosition(data)
 		} catch (e: unknown) {
-			setError((e as Error)?.message ?? "Unknown error");
-			setPosition(null);
+			setError((e as Error)?.message ?? "Unknown error")
+			setPosition(null)
 		} finally {
-			setLoading(false);
+			setLoading(false)
 		}
-	}, []);
+	}, [])
 
 	useEffect(() => {
-		fetchRandomPosition();
-	}, [fetchRandomPosition]);
+		fetchRandomPosition()
+	}, [fetchRandomPosition])
 
 	const isCorrect = useMemo(() => {
-		if (!submitted || !position) return false;
-		return normalize(answer) === normalize(position.name);
-	}, [submitted, answer, position]);
+		if (!submitted || !position) return false
+		return normalize(answer) === normalize(position.name)
+	}, [submitted, answer, position])
 
 	const canSubmit = useMemo(() => {
-		return !!position && !loading && answer.trim().length > 0 && !submitted;
-	}, [position, loading, answer, submitted]);
+		return !!position && !loading && answer.trim().length > 0 && !submitted
+	}, [position, loading, answer, submitted])
 
-	const onSubmit = () => setSubmitted(true);
+	const onSubmit = () => setSubmitted(true)
 
-	const onNext = () => fetchRandomPosition();
+	const onNext = () => fetchRandomPosition()
 
 	return (
 		<Container maxWidth="sm" sx={{ py: 4 }}>
@@ -96,11 +96,7 @@ export const UppgiftPage = () => {
 							<Alert
 								severity="error"
 								action={
-									<Button
-										color="inherit"
-										size="small"
-										onClick={fetchRandomPosition}
-									>
+									<Button color="inherit" size="small" onClick={fetchRandomPosition}>
 										Försök igen
 									</Button>
 								}
@@ -117,8 +113,7 @@ export const UppgiftPage = () => {
 
 								<Stack spacing={0.5}>
 									<Typography variant="body1" fontFamily="monospace">
-										N{position.sweref99Coordinates.northing} E
-										{position.sweref99Coordinates.easting}
+										N{position.sweref99Coordinates.northing} E{position.sweref99Coordinates.easting}
 									</Typography>
 								</Stack>
 
@@ -133,17 +128,13 @@ export const UppgiftPage = () => {
 										fullWidth
 										disabled={submitted}
 										onKeyDown={(e) => {
-											if (e.key === "Enter" && canSubmit) onSubmit();
+											if (e.key === "Enter" && canSubmit) onSubmit()
 										}}
 									/>
 								</Stack>
 
 								<Stack direction="row" spacing={1} flexWrap="wrap">
-									<Button
-										variant="contained"
-										onClick={onSubmit}
-										disabled={!canSubmit}
-									>
+									<Button variant="contained" onClick={onSubmit} disabled={!canSubmit}>
 										Svara
 									</Button>
 
@@ -177,8 +168,7 @@ export const UppgiftPage = () => {
 											"Rätt! 🎉"
 										) : (
 											<>
-												Inte riktigt. Rätt svar är:{" "}
-												<strong>{position.name}</strong>
+												Inte riktigt. Rätt svar är: <strong>{position.name}</strong>
 											</>
 										)}
 									</Alert>
@@ -193,5 +183,5 @@ export const UppgiftPage = () => {
 				</Typography> */}
 			</Stack>
 		</Container>
-	);
-};
+	)
+}

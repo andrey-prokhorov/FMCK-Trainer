@@ -1,5 +1,5 @@
-import type { Position } from "./position";
+import type { Position } from "./position"
 
 export type PositionsResponse = {
-	positions: Position[];
-};
+	positions: Position[]
+}

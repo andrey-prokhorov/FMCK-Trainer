@@ -1,13 +1,5 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import {
-	Box,
-	Container,
-	Link,
-	List,
-	ListItem,
-	ListItemIcon,
-	Typography,
-} from "@mui/material";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline"
+import { Box, Container, Link, List, ListItem, ListItemIcon, Typography } from "@mui/material"
 
 export const AboutPage = () => {
 	return (
@@ -18,19 +10,13 @@ export const AboutPage = () => {
 				</Typography>
 
 				<Typography variant="body1">
-					Denna lösning är byggd i C# .NET (Backend), Vite, React och TypeScript
-					(Frontend) och kan användas internt inom FMCK (Frivilliga
-					Motorcykelkåren) för att öva på att hitta platser med
-					SWEREF-koordinater.
+					Denna lösning är byggd i C# .NET (Backend), Vite, React och TypeScript (Frontend) och kan användas internt
+					inom FMCK (Frivilliga Motorcykelkåren) för att öva på att hitta platser med SWEREF-koordinater.
 				</Typography>
 
 				<Typography variant="body1" paragraph>
 					Mer information om organisationen finns på{" "}
-					<Link
-						href="https://fmck.se/"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
+					<Link href="https://fmck.se/" target="_blank" rel="noopener noreferrer">
 						https://fmck.se/
 					</Link>
 				</Typography>
@@ -39,9 +25,7 @@ export const AboutPage = () => {
 					Övningstyper
 				</Typography>
 
-				<Typography variant="body1">
-					Appen stödjer två typer av övningar:
-				</Typography>
+				<Typography variant="body1">Appen stödjer två typer av övningar:</Typography>
 
 				<List>
 					<ListItem>
@@ -49,8 +33,7 @@ export const AboutPage = () => {
 							<CheckCircleOutlineIcon color="primary" />
 						</ListItemIcon>
 						<Typography variant="body1">
-							Man får koordinater och ska ange namnet på platsen (t.ex. kyrka,
-							sjukhus etc.).
+							Man får koordinater och ska ange namnet på platsen (t.ex. kyrka, sjukhus etc.).
 						</Typography>
 					</ListItem>
 
@@ -59,12 +42,11 @@ export const AboutPage = () => {
 							<CheckCircleOutlineIcon color="primary" />
 						</ListItemIcon>
 						<Typography variant="body1" color="text.secondary">
-							Man får namnet på platsen och ska ange rätt koordinater (Under
-							utveckling. Kommer snart).
+							Man får namnet på platsen och ska ange rätt koordinater (Under utveckling. Kommer snart).
 						</Typography>
 					</ListItem>
 				</List>
 			</Box>
 		</Container>
-	);
-};
+	)
+}

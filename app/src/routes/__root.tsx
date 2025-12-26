@@ -1,6 +1,6 @@
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router"
 
-import Header from "../components/navigation/Header";
+import Header from "../components/navigation/Header"
 
 export const Route = createRootRoute({
 	component: () => (
@@ -9,4 +9,4 @@ export const Route = createRootRoute({
 			<Outlet />
 		</>
 	),
-});
+})

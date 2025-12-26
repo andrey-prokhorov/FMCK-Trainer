@@ -8,5 +8,5 @@ export const normalize = (s: string) => {
 			.replace(/[\u0300-\u036f]/g, "")
 			// ta bort extra whitespace
 			.replace(/\s+/g, " ")
-	);
-};
+	)
+}
